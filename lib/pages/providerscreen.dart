@@ -208,16 +208,13 @@ class _ForexListState extends State<Forex> {
               _searchBar(),
               SizedBox(
                 height: 300,
-                child: Expanded(
-                  child: ListView.builder(
-                    itemCount: forexproviderstodisplay.length,
-                    itemBuilder: (context, index) {
-                      return _listProviders(index);
-                    },
-                  ),
+                child: ListView.builder(
+                  itemCount: forexproviderstodisplay.length,
+                  itemBuilder: (context, index) {
+                    return _listProviders(index);
+                  },
                 ),
               ),
-              Text("sdfghjkvbghj"),
             ],
           ),
         ));
@@ -272,6 +269,7 @@ class _ForexListState extends State<Forex> {
   }
 
   _listProviders(index) {
+    print("hi");
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 4.0),
       child: //GFAccordion(
