@@ -5,6 +5,7 @@ import 'pages/profile.dart';
 import 'pages/homepage.dart';
 import 'pages/verify.dart';
 import 'pages/providerscreen.dart';
+import 'pages/ProfilePage.dart';
 
 void main() {
   runApp(MyApp());
@@ -25,8 +26,9 @@ class MyApp extends StatelessWidget {
       routes: {
         '/profile': (context) => Profile(),
         '/': (context) => MainLogin(),
-        '/home': (context) => Forex(),
+        '/home': (context) => Forex("INR,USD"),
         '/verify': (context) => Verify(),
+        '/prof': (context) => ProfilePage()
       },
     );
   }
