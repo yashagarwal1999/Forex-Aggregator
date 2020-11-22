@@ -27,6 +27,10 @@ dependencies:
   syncfusion_flutter_charts: ^18.3.50
   getwidget: ^1.1.0
   highlight_text: ^0.7.2
+  flutter_bootstrap: "^1.0.1"
+  expandable: ^4.1.4
+ 
+
   flutter:
     sdk: flutter
 
