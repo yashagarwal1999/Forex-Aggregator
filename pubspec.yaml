@@ -24,12 +24,13 @@ dependencies:
   http: ^0.12.2
   rflutter_alert: ^1.1.0
   flutter_spinkit: "^4.1.2"
-  syncfusion_flutter_charts: ^18.3.50
+  syncfusion_flutter_charts: ^18.3.50 
   getwidget: ^1.1.0
   highlight_text: ^0.7.2
   flutter_bootstrap: "^1.0.1"
   expandable: ^4.1.4
- 
+  smooth_star_rating: 1.1.1
+
 
   flutter:
     sdk: flutter

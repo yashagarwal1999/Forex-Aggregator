@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/profile': (context) => Profile(),
         '/': (context) => MainLogin(),
-        '/home': (context) => Forex("INR", "USD", 30),
+        '/home': (context) => Forex("INR", "USD"),
         '/verify': (context) => Verify(),
         '/prof': (context) => ProfilePage()
       },
