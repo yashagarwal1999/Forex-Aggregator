@@ -13,12 +13,15 @@ import 'package:http/http.dart' as http;
 import 'constants.dart';
 import 'package:expandable/expandable.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 class Forex extends StatefulWidget {
   String c1, c2;
-  Forex(final String x, final String y) {
+  double amount;
+  Forex(final String x, final String y, final double am) {
     c1 = y;
     c2 = x;
+    amount = am;
   }
   @override
   _ForexListState createState() => _ForexListState();
@@ -26,7 +29,7 @@ class Forex extends StatefulWidget {
 
 class Provider {
   String name;
-  String rating;
+  double rating;
   double price;
   String info;
   String link;
@@ -60,30 +63,98 @@ class _ForexListState extends State<Forex> {
   double leftPad = 0, rightPad = 0;
   String sea = '';
   double rate = 0;
-  String sortingCat = "Price";
+  String sortingCat = "Price (high to low)";
   Widget mainW = SpinKitCircle(
     color: kPrimaryColor,
   );
-  double amount = 1,
+  ////
+  String dropdownvalue1 = "USD";
+  String dropdownvalue2 = "INR";
+  Widget getDropDown1() {
+    return new DropdownSearch<String>(
+      maxHeight: 450,
+      // label: "Select Currency",
+      mode: Mode.MENU,
+      showSearchBox: true,
+      showSelectedItem: true,
+      items: dropdowncurrency,
+      hint: "country in menu mode12",
+      selectedItem: c1,
+      onChanged: (String newcurr) {
+        setState(() {
+          c1 = newcurr;
+          mainW = SpinKitCircle(
+            color: kPrimaryColor,
+          );
+          gett();
+        });
+      },
+    );
+  }
+
+  Widget getDropDown2() {
+    return new DropdownSearch<String>(
+      maxHeight: 450,
+      // label: "Select Currency",
+      mode: Mode.MENU,
+      showSearchBox: true,
+      showSelectedItem: true,
+      items: dropdowncurrency,
+      hint: "country in menu mode12",
+      selectedItem: c2,
+      onChanged: (String newcurr) {
+        setState(() {
+          c2 = newcurr;
+          mainW = SpinKitCircle(
+            color: kPrimaryColor,
+          );
+          gett();
+        });
+      },
+    );
+  }
+
+  /////
+  double amount = -1,
       converted_amount = 0,
       highest_five = 0,
       highest_ten = 0,
       lowest_five = 0,
       lowest_ten = 0;
   List<Provider> forexproviders = [];
+
+  final List<String> dropdowncurrency = [
+    "INR",
+    "USD",
+    "EUR",
+    "CAD",
+    "JPY",
+    "GBP",
+    "CHF",
+    "ZAR",
+    "NZD",
+    "HKD",
+    "AUD",
+    "RON"
+  ];
   List<ChartData> data = [], pred_data = [];
   void getData() async {
     String body = json.encode({"c1": c1, "c2": c2});
-    http.Response res = await http.post("http://localhost:8500/convert",
-        headers: {"Content-Type": "application/json"}, body: body);
+    http.Response res = await http.post(
+        "https://wuhackathon.herokuapp.com/convert",
+        headers: {"Content-Type": "application/json"},
+        body: body);
     String b1 = json.encode({"amount": amount});
     http.Response res1 = await http.post(
-        "http://localhost:8500/getallproviders",
+        "https://wuhackathon.herokuapp.com/getallproviders",
         headers: {"Content-Type": "application/json"},
         body: b1);
     Map data1 = json.decode(res.body);
     Map data2 = json.decode(res1.body);
     print(data1);
+    // http.Response res3 =
+    //     await http.get("http://forexproj.herokuapp.com/USD_INR");
+    // Map data3 = json.decode(res3.body);
     double temp = data1["data"]["rate"], temp2, temp3, temp4, temp5;
     var provider_data = data2["provider_data"];
     var prev_data = data1["data"]["prev_data"];
@@ -100,10 +171,14 @@ class _ForexListState extends State<Forex> {
     });
     setState(() {
       rate = temp;
+      data = [];
+      pred_data = [];
+      forexproviderstodisplay = [];
+      forexproviders = [];
       provider_data.forEach((e) => {
             forexproviders.add(Provider(
                 name: e["name"],
-                rating: e["rating"].toString(),
+                rating: e["rating"],
                 price: (e["amount"] + 1) * rate,
                 info: e["info"],
                 link: e["link"]))
@@ -118,6 +193,7 @@ class _ForexListState extends State<Forex> {
         pred_data
             .add(ChartData(element.x, (element.val1 + element.val1 / 100)));
       });
+      // pred_data = data3["predictions"];
     });
   }
 
@@ -127,8 +203,13 @@ class _ForexListState extends State<Forex> {
 
   List<Widget> cardOfProviders = [];
   List<Provider> forexproviderstodisplay = [];
-  var parameters = ['Price', 'Rating'];
-  var currentitemselected = 'Price';
+  var parameters = [
+    'Price (high to low)',
+    'Price (low to high)',
+    'Rating (high to low)',
+    'Rating (low to high)'
+  ];
+  var currentitemselected = 'Price (high to low)';
 
   @override
   void initState() {
@@ -153,6 +234,9 @@ class _ForexListState extends State<Forex> {
     //c2 = widget.currs[1];
     c1 = widget.c1;
     c2 = widget.c2;
+    if (amount == -1) {
+      amount = widget.amount;
+    }
     double width = MediaQuery.of(context).size.width;
     leftPad = (width < 1200) ? 0 : width / 6;
     rightPad = leftPad;
@@ -175,9 +259,14 @@ class _ForexListState extends State<Forex> {
       forexproviderstodisplay[i].price *= amount;
     }
     cardOfProviders = [];
-    if (sortingCat == "Price")
+    //'Rating (high to low)','Rating (low to high)'
+    if (sortingCat == 'Price (high to low)')
+      forexproviderstodisplay.sort((x, y) => y.price.compareTo(x.price));
+    else if (sortingCat == 'Price (low to high)')
       forexproviderstodisplay.sort((x, y) => x.price.compareTo(y.price));
-    else if (sortingCat == "Rating")
+    else if (sortingCat == 'Rating (high to low)')
+      forexproviderstodisplay.sort((x, y) => y.rating.compareTo(x.rating));
+    else if (sortingCat == 'Rating (low to high)')
       forexproviderstodisplay.sort((x, y) => x.rating.compareTo(y.rating));
     forexproviderstodisplay.forEach((element) {
       cardOfProviders.add(Container(
@@ -202,7 +291,7 @@ class _ForexListState extends State<Forex> {
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey[300],
+                  color: Colors.white,
                   blurRadius: 2.0,
                   spreadRadius: 2,
                 ),
@@ -221,6 +310,7 @@ class _ForexListState extends State<Forex> {
                           alignment: Alignment.centerLeft,
                           image: NetworkImage(element.link)),
                     ),
+                    SizedBox(width: 15),
                     Expanded(
                       flex: 9,
                       child: Row(
@@ -231,19 +321,20 @@ class _ForexListState extends State<Forex> {
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 20),
                             ),
-                            Text("Price:" + element.price.toStringAsFixed(2),
+                            Text("Price:" + element.price.toStringAsFixed(4),
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 20)),
-                            SmoothStarRating(
-                                allowHalfRating: false,
-                                onRated: (v) {},
-                                starCount: 5,
-                                rating: double.parse(element.rating),
-                                size: 30.0,
-                                isReadOnly: true,
-                                color: Colors.green,
-                                borderColor: Colors.green,
-                                spacing: 0.0)
+                            Row(
+                              children: <Widget>[
+                                Text(element.rating.toString()),
+                                Icon(
+                                  Icons.star,
+                                  color: (element.rating <= 3
+                                      ? Colors.red
+                                      : Colors.green),
+                                ),
+                              ],
+                            ),
                           ]),
                     ),
                   ]),
@@ -394,72 +485,84 @@ class _ForexListState extends State<Forex> {
               ),
               BootstrapCol(
                 sizes: 'col-lg-6 col-sm-12 col-md-12',
-                child: Card(
-                  color: kPrimaryColor,
-                  elevation: 2,
-                  child: Padding(
-                    padding: EdgeInsets.all(rightPad / 10),
-                    child: BootstrapRow(height: 30, children: [
-                      BootstrapCol(
-                        sizes: 'col-lg-3 col-md-12 col-sm-12',
-                        child: Card(
-                          color: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(10),
-                            ),
-                          ),
-                          child: TextFormField(
-                            initialValue: "1",
-                            textAlign: TextAlign.center,
-                            onChanged: (val) => {
-                              setState(() {
-                                amount = double.parse(val);
-                              })
-                            },
-                          ),
-                        ),
-                      ),
-                      BootstrapCol(
-                          sizes: 'col-lg-3 col-md-4 col-sm-4',
-                          child: Card(
-                            color: Colors.grey[200],
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(10),
+                child: BootstrapContainer(fluid: true, children: [
+                  Container(
+                    // color: Colors.black.withOpacity(0.4),
+                    decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.4),
+                        image: DecorationImage(
+                            fit: BoxFit.fill,
+                            image: NetworkImage(
+                                "https://www.teahub.io/photos/full/153-1536778_1920x1080-1440x9001280x800-navy-blue-gradient-background.jpg"))),
+                    //elevation: 2,
+                    child: BootstrapContainer(
+                        fluid: true,
+                        padding: EdgeInsets.all(rightPad / 10),
+                        children: [
+                          BootstrapRow(height: 30, children: [
+                            BootstrapCol(
+                              sizes: 'col-lg-3 col-md-12 col-sm-12',
+                              child: Card(
+                                color: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(10),
+                                  ),
+                                ),
+                                child: TextFormField(
+                                  initialValue: amount.toString(),
+                                  textAlign: TextAlign.center,
+                                  onChanged: (val) => {
+                                    setState(() {
+                                      amount = double.parse(val);
+                                    })
+                                  },
+                                ),
                               ),
                             ),
-                            child: TextFormField(
-                              initialValue: c1,
-                              enabled: false,
-                              textAlign: TextAlign.center,
-                            ),
-                          )),
-                      BootstrapCol(
-                          sizes: 'col-lg-2 col-sm-2 col-md-2',
-                          child: Image(
-                              height: 40,
-                              color: Colors.white,
-                              image: NetworkImage(
-                                  "https://cdn2.iconfinder.com/data/icons/one-way/842/Arrow9-512.png"))),
-                      BootstrapCol(
-                          sizes: 'col-lg-3 col-md-4 col-sm-4',
-                          child: Card(
-                            color: Colors.grey[200],
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(10),
-                              ),
-                            ),
-                            child: TextFormField(
-                              initialValue: c2,
-                              textAlign: TextAlign.center,
-                              enabled: false,
-                            ),
-                          )),
-                    ]),
+                            BootstrapCol(
+                                sizes: 'col-lg-3 col-md-4 col-sm-4',
+                                child: Card(
+                                  color: Colors.grey[200],
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(10),
+                                    ),
+                                  ),
+                                  child: getDropDown1(),
+                                  //TextFormField(
+                                  //   initialValue: c1,
+                                  //   enabled: false,
+                                  //   textAlign: TextAlign.center,
+                                  // ),
+                                )),
+                            BootstrapCol(
+                                sizes: 'col-lg-2 col-sm-2 col-md-2',
+                                child: Image(
+                                    height: 40,
+                                    color: Colors.white,
+                                    image: NetworkImage(
+                                        "https://cdn2.iconfinder.com/data/icons/one-way/842/Arrow9-512.png"))),
+                            BootstrapCol(
+                                sizes: 'col-lg-3 col-md-4 col-sm-4',
+                                child: Card(
+                                  color: Colors.grey[200],
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(10),
+                                    ),
+                                  ),
+                                  child: getDropDown2(),
+                                  // TextFormField(
+                                  //   initialValue: c2,
+                                  //   textAlign: TextAlign.center,
+                                  //   enabled: false,
+                                  // ),
+                                )),
+                          ]),
+                        ]),
                   ),
-                ),
+                ]),
               ),
               _searchBar(),
               SizedBox(
