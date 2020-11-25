@@ -326,7 +326,13 @@ class _ForexListState extends State<Forex> {
                                     fontWeight: FontWeight.bold, fontSize: 20)),
                             Row(
                               children: <Widget>[
-                                Text(element.rating.toString()),
+                                Text(
+                                  element.rating.toString(),
+                                  style: TextStyle(
+                                      color: element.rating <= 3
+                                          ? Colors.red
+                                          : Colors.green),
+                                ),
                                 Icon(
                                   Icons.star,
                                   color: (element.rating <= 3
