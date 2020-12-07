@@ -12,9 +12,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Widget mainw = SpinKitRing(color: kPrimaryColor); //spinkit before loading and table after loading
+  Widget mainw = SpinKitRing(
+      color: kPrimaryColor); //spinkit before loading and table after loading
   String base = "INR"; //base currency
-  List<String> currencies = [];//List of all currencies
+  List<String> currencies = []; //List of all currencies
 
   //This function will change the table and base
   void getData() async {
@@ -25,7 +26,6 @@ class _HomePageState extends State<HomePage> {
     //print(data);
     //This will change all the state variable
     setState(() {
-
       List<Widget> curr = [];
       List<Widget> values = [];
       currencies = [];

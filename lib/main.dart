@@ -5,6 +5,9 @@ import 'pages/profile.dart';
 import 'pages/homepage.dart';
 import 'pages/verify.dart';
 import 'pages/providerscreen.dart';
+import 'pages/firstpage.dart';
+import 'pages/chatbot.dart';
+import 'pages/About.dart';
 
 void main() {
   runApp(MyApp());
@@ -25,8 +28,11 @@ class MyApp extends StatelessWidget {
       routes: {
         '/profile': (context) => Profile(),
         '/': (context) => MainLogin(),
-        '/home': (context) => Forex(),
+        // '/home': (context) => Forex(),
+        '/home': (context) => FirstPage(),
         '/verify': (context) => Verify(),
+        '/chat': (context) => ChatBot(),
+        '/about': (context) => AboutPage()
       },
     );
   }

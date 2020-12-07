@@ -6,7 +6,7 @@ class Navigation extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: kPrimaryColor,
+        color: Colors.transparent,
       ),
       padding: EdgeInsets.all(20.0),
       child: Row(

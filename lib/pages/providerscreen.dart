@@ -1,10 +1,18 @@
+import 'dart:convert';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:highlight_text/highlight_text.dart';
+import 'package:http/http.dart' as http;
 
 class Forex extends StatefulWidget {
+  String symbs;
+  Forex(final String c) {
+    symbs = c;
+  }
   @override
   _ForexListState createState() => _ForexListState();
 }
@@ -18,15 +26,51 @@ class Provider {
 }
 
 class ChartData {
-  ChartData(this.x, this.open, this.high, this.low, this.close);
+  ChartData(this.x, this.val1, this.val2);
   final DateTime x;
-  final double open;
-  final double high;
-  final double low;
-  final double close;
+  final double val1;
+  final double val2;
 }
 
 class _ForexListState extends State<Forex> {
+  String c;
+  String c1, c2;
+
+  List<ChartData> data = [], pred_data = [];
+  void getData() async {
+    print("c=>" + c);
+    http.Response res = await http.get(
+        "https://api.exchangeratesapi.io/history?start_at=2018-01-01&end_at=2018-01-11&symbols=" +
+            c);
+
+    Map data1 = json.decode(res.body)["rates"];
+    print("data1=>");
+    print(data1);
+    List<ChartData> da = [];
+    data1.forEach((key, value) {
+      da.add(ChartData(DateTime.parse(key), value[c1], value[c2]));
+    });
+    da.sort((x, y) {
+      return x.x.compareTo(y.x);
+    });
+    if (data.length == 0) {
+      setState(() {
+        data = da;
+
+        data.forEach((element) {
+          pred_data.add(ChartData(
+              element.x,
+              (element.val1 + element.val1 / 100),
+              (element.val2 + element.val2 / 100)));
+        });
+      });
+    }
+  }
+
+  void gett() async {
+    await getData();
+  }
+
   List<Provider> forexproviders = [
     Provider(
         name: 'abcd',
@@ -63,23 +107,9 @@ class _ForexListState extends State<Forex> {
   var parameters = ['Price', 'Rating'];
   var currentitemselected = 'Price';
 
-  List<ChartData> data = [
-    ChartData(DateTime(2016, 01, 11), 90.97, 101.19, 95.36, 97.13),
-    ChartData(DateTime(2016, 01, 25), 101.97, 101.19, 92.36, 94.02),
-    ChartData(DateTime(2016, 01, 27), 84.97, 91.19, 95.36, 93.13),
-    ChartData(DateTime(2016, 01, 29), 90.97, 101.19, 95.36, 97.13),
-    ChartData(DateTime(2016, 02, 03), 98.97, 91.19, 95.36, 87.13),
-    ChartData(DateTime(2016, 02, 05), 101.97, 101.19, 92.36, 94.02),
-    ChartData(DateTime(2016, 02, 11), 84.97, 91.19, 95.36, 93.13),
-    ChartData(DateTime(2016, 02, 19), 90.97, 101.19, 95.36, 97.13),
-    ChartData(DateTime(2016, 02, 21), 90.97, 101.19, 95.36, 97.13),
-    ChartData(DateTime(2016, 02, 25), 101.97, 101.19, 92.36, 94.02),
-    ChartData(DateTime(2016, 02, 27), 84.97, 91.19, 95.36, 93.13),
-    ChartData(DateTime(2016, 02, 29), 90.97, 101.19, 95.36, 97.13),
-  ];
-
   @override
   void initState() {
+    //  gett();
     setState(() {
       forexproviderstodisplay = forexproviders;
     });
@@ -89,90 +119,109 @@ class _ForexListState extends State<Forex> {
 
   @override
   Widget build(BuildContext context) {
+    //c1 = widget.currs[0];
+    //c2 = widget.currs[1];
+    c = widget.symbs;
+    c1 = c.split(',')[0];
+    c2 = c.split(',')[1];
+    gett();
+    data.forEach((element) {
+      print(element.x);
+    });
     return Scaffold(
         appBar: AppBar(
           title: new Text("Forex Screen"),
           centerTitle: true,
           backgroundColor: Colors.blue[600],
         ),
-        body: ListView(
-          children: <Widget>[
-            Column(
-              children: <Widget>[
-                Container(
-                  height: 450,
-                  child: SfCartesianChart(
-                    primaryXAxis: DateTimeAxis(),
-                    primaryYAxis: NumericAxis(),
-                    series: <ChartSeries>[
-                      HiloOpenCloseSeries<ChartData, dynamic>(
-                        dataSource: data,
-                        xValueMapper: (ChartData sales, _) => sales.x,
-                        highValueMapper: (ChartData sales, _) => sales.high,
-                        lowValueMapper: (ChartData sales, _) => sales.low,
-                        openValueMapper: (ChartData sales, _) => sales.open,
-                        closeValueMapper: (ChartData sales, _) => sales.close,
+        body: SafeArea(
+          child: ListView(
+            children: <Widget>[
+              Column(
+                children: <Widget>[
+                  Container(
+                    height: 450,
+                    child: SfCartesianChart(
+                      primaryXAxis: DateTimeAxis(
+                          name: "Date", dateFormat: DateFormat("dd-MM-yyyy")),
+                      primaryYAxis: NumericAxis(),
+                      legend: Legend(isVisible: true),
+                      series: <ChartSeries>[
+                        FastLineSeries<ChartData, DateTime>(
+                            dataSource: data,
+                            xValueMapper: (ChartData d, _) => d.x,
+                            yValueMapper: (ChartData d, _) => d.val1,
+                            dataLabelSettings:
+                                DataLabelSettings(isVisible: true),
+                            legendItemText: "Actual"),
+                        FastLineSeries<ChartData, DateTime>(
+                            dataSource: pred_data,
+                            xValueMapper: (ChartData d, _) => d.x,
+                            yValueMapper: (ChartData d, _) => d.val1,
+                            dataLabelSettings:
+                                DataLabelSettings(isVisible: true),
+                            legendItemText: "Predicted"),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              Text("Performance"),
+              Card(
+                  child: Column(
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Column(
+                        children: <Widget>[
+                          Text("Today's High"),
+                          Text("fdgh"),
+                        ],
+                      ),
+                      Column(
+                        children: <Widget>[
+                          Text("Today's Low"),
+                          Text("dvbnm"),
+                        ],
                       )
                     ],
                   ),
-                )
-              ],
-            ),
-            Text("Performance"),
-            Card(
-                child: Column(
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        Text("Today's High"),
-                        Text("fdgh"),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        Text("Today's Low"),
-                        Text("dvbnm"),
-                      ],
-                    )
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        Text("Week's High"),
-                        Text("fdgh"),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        Text("Week's Low"),
-                        Text("dvbnm"),
-                      ],
-                    )
-                  ],
-                ),
-              ],
-            )),
-            Text("Forex Providers"),
-            _searchBar(),
-            Expanded(
-              child: SizedBox(
-                height: 300,
-                child: ListView.builder(
-                  itemCount: forexproviderstodisplay.length,
-                  itemBuilder: (context, index) {
-                    return _listProviders(index);
-                  },
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Column(
+                        children: <Widget>[
+                          Text("Week's High"),
+                          Text("fdgh"),
+                        ],
+                      ),
+                      Column(
+                        children: <Widget>[
+                          Text("Week's Low"),
+                          Text("dvbnm"),
+                        ],
+                      )
+                    ],
+                  ),
+                ],
+              )),
+              Text("Forex Providers"),
+              _searchBar(),
+              Expanded(
+                child: SizedBox(
+                  height: 300,
+                  child: ListView.builder(
+                    itemCount: forexproviderstodisplay.length,
+                    itemBuilder: (context, index) {
+                      return _listProviders(index);
+                    },
+                  ),
                 ),
               ),
-            ),
-            Text("sdfghjkvbghj"),
-          ],
+              Text("sdfghjkvbghj"),
+            ],
+          ),
         ));
   }
 
