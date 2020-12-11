@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:forexaggregator/pages/verifylogin.dart';
 import 'constants.dart';
 import 'navigation.dart';
 import 'providerscreen.dart';
 import 'package:http/http.dart' as http;
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:flutter_bootstrap/flutter_bootstrap.dart';
-import 'package:circular_profile_avatar/circular_profile_avatar.dart';
 import "package:country_icons/country_icons.dart";
 import "package:flag/flag.dart";
 import 'package:dropdown_search/dropdown_search.dart';
@@ -33,7 +33,6 @@ class _FirstPageState extends State<FirstPage> {
   final List<String> dropdowncurrency = [
     "INR",
     "USD",
-    "EUR",
     "CAD",
     "JPY",
     "GBP",
@@ -60,13 +59,13 @@ class _FirstPageState extends State<FirstPage> {
   };
 
   String dropdownvalue1 = "INR";
-  String dropdownvalue2 = "INR";
+  String dropdownvalue2 = "USD";
   String dropdownvalue3 = "INR";
   double FontSize = 20;
   String base = "INR";
   Widget loading1;
   double width123 = 20;
-  int amount = 0;
+  double amount = 0;
 
   Map storeconversiondata = new Map();
   void getData() async {
@@ -101,11 +100,16 @@ class _FirstPageState extends State<FirstPage> {
     await getData();
   }
 
-  // @override
-  // void initState() {
-  //   // TODO: implement initState
-  //   callgetDataAsync();
-  // }
+  void call() async {
+    await verifylogin(context);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    call();
+  }
 
   void sendData() {
     if (amount <= 0) {
@@ -131,7 +135,7 @@ class _FirstPageState extends State<FirstPage> {
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  Forex(dropdownvalue1 + "," + dropdownvalue2)));
+                  Forex(dropdownvalue2, dropdownvalue1, amount)));
     } else {
       Alert(
               context: context,
@@ -168,7 +172,8 @@ class _FirstPageState extends State<FirstPage> {
 
   Widget getDropDown1() {
     return Container(
-      decoration: BoxDecoration(color: Colors.white),
+      decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(5)),
       child: new DropdownSearch<String>(
         maxHeight: 450,
         // label: "Select Currency",
@@ -206,7 +211,8 @@ class _FirstPageState extends State<FirstPage> {
 
   Widget getDropDown2() {
     return Container(
-      decoration: BoxDecoration(color: Colors.white),
+      decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(5)),
       child: new DropdownSearch<String>(
         maxHeight: 450,
         mode: Mode.MENU,
@@ -256,66 +262,56 @@ class _FirstPageState extends State<FirstPage> {
   Widget createTopLossList(final CurrencyRate CURR) {
     String name = CURR.currency;
     String value = CURR.rate.toStringAsFixed(3);
-    return Padding(
-      padding: EdgeInsets.all(8.0),
-      child: new Container(
-        // padding: EdgeInsets.fromLTRB(70, 5, 5, 5),
-        // width: 200,
-        // height: 100,
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          // color: Colors.pink,
-          elevation: 10,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                // leading: Icon(Icons.album, size: 70),
-                title: Row(children: [
-                  Column(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(50.0),
-                        child: Image.asset(
-                          'icons/flags/png/' + Flags[CURR.currency],
-                          package: 'country_icons',
-                          height: 35,
-                          width: 35,
-                          fit: BoxFit.fill,
-                        ),
-                      ),
-                      Text(CURR.currency,
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                    ],
+    return Container(
+      margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
+      width: 200,
+      child: Card(
+        elevation: 10,
+        // leading: Icon(Icons.album, size: 70),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Column(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(50.0),
+                  child: Image.asset(
+                    'icons/flags/png/' + Flags[base],
+                    package: 'country_icons',
+                    height: 35,
+                    width: 35,
+                    fit: BoxFit.fill,
                   ),
-                  Image(
-                    image: NetworkImage(
-                        "https://cdn0.iconfinder.com/data/icons/feather/96/591276-arrow-right-512.png"),
-                    height: 20,
+                ),
+                Text(base, style: TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+            Icon(
+              Icons.arrow_right_alt,
+              color: Colors.blue[900],
+              // image: NetworkImage(
+              //     "https://cdn0.iconfinder.com/data/icons/feather/96/591276-arrow-right-512.png"),
+              size: 40,
+            ),
+            Column(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(50.0),
+                  child: Image.asset(
+                    'icons/flags/png/' + Flags[CURR.currency],
+                    package: 'country_icons',
+                    height: 35,
+                    width: 35,
+                    fit: BoxFit.fill,
                   ),
-                  Column(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(50.0),
-                        child: Image.asset(
-                          'icons/flags/png/' + Flags[base],
-                          package: 'country_icons',
-                          height: 35,
-                          width: 35,
-                          fit: BoxFit.fill,
-                        ),
-                      ),
-                      Text(base, style: TextStyle(fontWeight: FontWeight.bold))
-                    ],
-                  ),
-                  SizedBox(width: 20),
-                  Text(value, style: TextStyle(fontWeight: FontWeight.bold)),
-                ]),
-              ),
-            ],
-          ),
+                ),
+                Text(CURR.currency,
+                    style: TextStyle(fontWeight: FontWeight.bold))
+              ],
+            ),
+            SizedBox(width: 20),
+            Text(value, style: TextStyle(fontWeight: FontWeight.bold)),
+          ]),
         ),
       ),
     );
@@ -455,115 +451,144 @@ class _FirstPageState extends State<FirstPage> {
           // padding: EdgeInsets.all(8.0),
           child: ListView(
             children: <Widget>[
-              Container(
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                        fit: BoxFit.fill,
-                        image: NetworkImage(
-                            "http://www.allwhitebackground.com/images/5/Blue-Background-Image-HD.png"))),
-                child: Column(children: [
-                  Navigation(),
-                  Container(
-                    decoration:
-                        BoxDecoration(color: Colors.black.withOpacity(0.4)),
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: BootstrapCol(
-                        sizes: 'col-sm-12 col-md-10 col-lg-10',
-                        child: BootstrapRow(
-                          height: 50,
-                          // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            // Text(
-                            //   "From",
-                            //   style: TextStyle(fontSize: FontSize),
-                            // ),
-                            // SizedBox(width: width123),
-                            BootstrapCol(
-                              sizes: 'col-sm-12 col-md-2 col-lg-2',
-                              child:
-                                  Container(width: 90, child: getDropDown1()),
-                            ),
-                            BootstrapCol(
-                              sizes: 'col-sm-12 col-md-2 col-lg-2',
+              BootstrapContainer(
+                  fluid: true,
+                  decoration: BoxDecoration(
+                      border: Border(
+                          bottom: BorderSide(
+                              color: Colors.yellow,
+                              style: BorderStyle.solid,
+                              width: 3)),
+                      image: DecorationImage(
+                          fit: BoxFit.fill,
+                          image: NetworkImage(
+                              "https://www.teahub.io/photos/full/153-1536778_1920x1080-1440x9001280x800-navy-blue-gradient-background.jpg"))),
+                  children: [
+                    Column(children: [
+                      Navigation(),
+                      BootstrapCol(
+                        sizes: 'col-lg-10 col-sm-10 col-md-10',
+                        child: Container(
+                          decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.4),
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(10),
+                                  topRight: Radius.circular(10))),
+                          padding: const EdgeInsets.fromLTRB(8, 70, 8, 0),
+                          child: Center(
+                            child: BootstrapCol(
+                              sizes: 'col-sm-12 col-md-10 col-lg-10',
                               child: Padding(
-                                padding: EdgeInsets.fromLTRB(
-                                    0, MediaHt / 50.0, 0, 0),
-                                child: Image(
-                                  // width: 30,
-                                  image: NetworkImage(
-                                      "https://cdn2.iconfinder.com/data/icons/one-way/842/Arrow9-512.png"),
-                                  height: 20,
-                                ),
-                              ),
-                            ),
-                            // SizedBox(width: width123),
-
-                            // SizedBox(width: width123),
-                            BootstrapCol(
-                                sizes: 'col-sm-12 col-md-2 col-lg-2',
-                                child: Container(
-                                    width: 90, child: getDropDown2())),
-
-                            BootstrapCol(
-                              sizes: 'col-sm-12 col-md-3 col-lg-3',
-                              child: Container(
-                                width: 170,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(7),
-                                  border: Border.all(
-                                      color: Colors.grey,
-                                      style: BorderStyle.solid),
-                                ),
-                                child: Container(
-                                  margin: EdgeInsets.fromLTRB(
-                                      0, MediaHt / 150, 0, 0),
-                                  child: TextField(
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(color: Colors.black),
-                                    onChanged: (val) {
-                                      setState(() {
-                                        amount = int.parse(val);
-                                      });
-                                    },
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ],
-                                    decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        hintText: 'Enter the amount'),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // SizedBox(width: width123),
-                            BootstrapCol(
-                              sizes: 'col-sm-12 col-md-2 col-lg-2',
-                              child: Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: RaisedButton(
-                                    color: kPrimaryColor,
-                                    child: Text(
-                                      "Search",
-                                      style: TextStyle(color: TextColor),
+                                padding:
+                                    EdgeInsets.fromLTRB(0, MediaHt / 49, 0, 0),
+                                child: BootstrapRow(
+                                  height: 150,
+                                  // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+                                    // Text(
+                                    //   "From",
+                                    //   style: TextStyle(fontSize: FontSize),
+                                    // ),
+                                    // SizedBox(width: width123),
+                                    BootstrapCol(
+                                      sizes: 'col-sm-12 col-md-2 col-lg-2',
+                                      child: Container(
+                                          width: 90, child: getDropDown1()),
                                     ),
-                                    onPressed: () {
-                                      sendData();
-                                    },
-                                  ),
+                                    BootstrapCol(
+                                      sizes: 'col-sm-12 col-md-2 col-lg-2',
+                                      child: Padding(
+                                        padding: EdgeInsets.fromLTRB(
+                                            0, MediaHt / 300.0, 0, 0),
+                                        child: Icon(
+                                          // width: 30,
+                                          Icons.arrow_right_alt,
+                                          color: Colors.white,
+                                          // image: NetworkImage(
+                                          //     "https://cdn2.iconfinder.com/data/icons/one-way/842/Arrow9-512.png"),
+
+                                          size: 50,
+                                        ),
+                                      ),
+                                    ),
+                                    // SizedBox(width: width123),
+
+                                    // SizedBox(width: width123),
+                                    BootstrapCol(
+                                        sizes: 'col-sm-12 col-md-2 col-lg-2',
+                                        child: Container(
+                                            width: 90, child: getDropDown2())),
+
+                                    BootstrapCol(
+                                      sizes: 'col-sm-12 col-md-3 col-lg-3',
+                                      child: Container(
+                                        width: 170,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(7),
+                                          border: Border.all(
+                                              color: Colors.grey,
+                                              style: BorderStyle.solid),
+                                        ),
+                                        child: Container(
+                                          height: 45,
+                                          margin: EdgeInsets.fromLTRB(
+                                              0, MediaHt / 600, 0, 0),
+                                          child: TextFormField(
+                                            textAlign: TextAlign.center,
+                                            style:
+                                                TextStyle(color: Colors.black),
+                                            onChanged: (val) {
+                                              setState(() {
+                                                amount = double.parse(val);
+                                              });
+                                            },
+                                            keyboardType: TextInputType.number,
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter
+                                                  .digitsOnly
+                                            ],
+                                            decoration: InputDecoration(
+                                                border: InputBorder.none,
+                                                hintText: 'Enter the amount'),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    // SizedBox(width: width123),
+                                    BootstrapCol(
+                                      sizes: 'col-sm-12 col-md-2 col-lg-2',
+                                      child: Center(
+                                        child: Container(
+                                          padding:
+                                              EdgeInsets.fromLTRB(0, 4, 0, 0),
+                                          child: RaisedButton(
+                                            color: Colors.yellow,
+                                            child: Icon(
+                                              Icons
+                                                  .keyboard_arrow_right_outlined,
+                                              size: 40,
+                                              color: Colors.blue[900],
+                                              // image: NetworkImage(
+                                              //     "https://cdn2.iconfinder.com/data/icons/one-way/842/Arrow9-512.png")
+                                            ),
+                                            onPressed: () {
+                                              sendData();
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  ],
                                 ),
                               ),
-                            )
-                          ],
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  )
-                ]),
-              ),
+                      )
+                    ]),
+                  ]),
               SizedBox(height: 20),
               Column(
                 children: [
@@ -571,7 +596,7 @@ class _FirstPageState extends State<FirstPage> {
                 ],
               ),
               SizedBox(
-                height: 30,
+                height: 10,
               )
             ],
           ),

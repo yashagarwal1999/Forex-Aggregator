@@ -63,7 +63,7 @@ void request(BuildContext context, String text, bool flag, String email,
       Map object = {"email": email, "plainPassword": pass};
       String body = json.encode(object);
       http.Response res = await http.post(
-        "http://localhost:8007/login",
+        "https://wuhackathon.herokuapp.com/login",
         headers: {"Content-Type": "application/json"},
         body: body,
       );
@@ -104,7 +104,7 @@ void request(BuildContext context, String text, bool flag, String email,
         ).show();
         Future.delayed(const Duration(milliseconds: 5000), () {
           Navigator.pop(context);
-          Navigator.pushNamed(context, '/profile');
+          Navigator.pushNamed(context, '/home');
         });
       }
     }
@@ -118,7 +118,7 @@ void request(BuildContext context, String text, bool flag, String email,
     String body = json.encode(object);
     //print(body);
     http.Response res = await http.post(
-      "http://localhost:8007/signup",
+      "https://wuhackathon.herokuapp.com/signup",
       headers: {"Content-Type": "application/json"},
       body: body,
     );

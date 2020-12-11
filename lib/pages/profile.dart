@@ -17,7 +17,8 @@ class _ProfileState extends State<Profile> {
     final html.Storage _localStorage = html.window.localStorage;
     var to = _localStorage['token'];
     var isL = _localStorage['isLoggedin'];
-    http.Response res = await http.post("http://localhost:8007/profile",
+    http.Response res = await http.post(
+        "https://wuhackathon.herokuapp.com/profile",
         headers: {"Content-Type": "application/json"},
         body: json.encode({"isLoggedin": isL, "token": to}));
     var data1 = json.decode(res.body);

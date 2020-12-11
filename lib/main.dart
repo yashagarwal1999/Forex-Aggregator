@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:forexaggregator/pages/About.dart';
 import 'package:forexaggregator/pages/constants.dart';
+import 'package:forexaggregator/pages/signout.dart';
 import 'pages/main_login.dart';
 import 'pages/profile.dart';
 import 'pages/homepage.dart';
 import 'pages/verify.dart';
 import 'pages/providerscreen.dart';
+import 'pages/ProfilePage.dart';
 import 'pages/firstpage.dart';
-import 'pages/chatbot.dart';
-import 'pages/About.dart';
+import 'pages/landing_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -24,14 +26,14 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
+      initialRoute: '/land',
       routes: {
-        '/profile': (context) => Profile(),
+        '/profile': (context) => ProfilePage(),
         '/': (context) => MainLogin(),
-        // '/home': (context) => Forex(),
         '/home': (context) => FirstPage(),
         '/verify': (context) => Verify(),
-        '/chat': (context) => ChatBot(),
+        '/land': (context) => LandingPage(),
+        '/signout': (context) => SignOut(),
         '/about': (context) => AboutPage()
       },
     );

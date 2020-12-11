@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:forexaggregator/pages/constants.dart';
+import 'package:forexaggregator/pages/verifylogin.dart';
 import 'package:http/http.dart' as http;
 import 'navigation.dart';
 
@@ -12,10 +13,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Widget mainw = SpinKitRing(
-      color: kPrimaryColor); //spinkit before loading and table after loading
+  Widget mainw = SpinKitRing(color: kPrimaryColor); //spinkit before loading and table after loading
   String base = "INR"; //base currency
-  List<String> currencies = []; //List of all currencies
+  List<String> currencies = [];//List of all currencies
 
   //This function will change the table and base
   void getData() async {
@@ -26,6 +26,7 @@ class _HomePageState extends State<HomePage> {
     //print(data);
     //This will change all the state variable
     setState(() {
+
       List<Widget> curr = [];
       List<Widget> values = [];
       currencies = [];
@@ -52,6 +53,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+     verifylogin(context);
     return Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
